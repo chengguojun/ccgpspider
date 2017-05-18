@@ -8,6 +8,7 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+from logging import ERROR
 
 BOT_NAME = 'ccgp'
 
@@ -58,13 +59,16 @@ META = {
     'dont_redirect': True,  # 禁止网页重定向
     'handle_httpstatus_list': [301, 302]  # 对哪些异常返回进行处理
 }
-LOG_ENABLED = True
-LOG_ENCODING = 'utf-8'
-LOG_FILE = 'ccgp.log'
-LOG_LEVEL = 'DEBUG'
-LOG_STDOUT = False
+
+#LOG 日志
+# LOG_ENABLED = True
+# LOG_ENCODING = 'utf-8'
+# LOG_FILE = 'ccgp.log'
+# # LOG_LEVEL = #'ERROR' #'DEBUG''DEBUG'
+# LOG_LEVEL = 'DEBUG'
+# LOG_STDOUT = False
 #禁用cookies
-COOKIES_ENABLED=False
+# COOKIES_ENABLED=False
 
 #动态头
 USER_AGENTS = [

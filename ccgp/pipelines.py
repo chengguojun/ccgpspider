@@ -42,7 +42,7 @@ class MySQLStorePipeline(object):
                 print 'col_id.....',item.get('col_id')
             else:
                 self.cursor.execute("""
-                INSERT INTO ccgp2
+                INSERT INTO ccgp3
                 (col_id,col_title,col_type,col_gov_type,col_category,col_publish_time,col_buyer_name,col_projectId,col_zone,col_agent,col_html_content,col_index)
                 VALUES
                 (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
