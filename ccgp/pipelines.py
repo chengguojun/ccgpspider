@@ -5,10 +5,12 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import re
-
+import MySQLdb
 import MySQLdb.cursors
+import datetime
 from twisted.enterprise import adbapi
 import os
+
 
 class CcgpPipeline(object):
     def process_item(self, item, spider):
@@ -21,6 +23,48 @@ class CcgpPipeline(object):
         return item
 
 
+class MySQLStorePipeline(object):
+    dbuser = 'root'
+    dbpass = 'minemine'
+    dbname = 'spider'
+    dbhost = 'localhost'
+    dbport = '3306'
+
+    def __init__(self):
+        self.conn = MySQLdb.connect(user=self.dbuser, passwd=self.dbpass, db=self.dbname,
+                                    host=self.dbhost, charset="utf8",
+                                    use_unicode=True)
+        self.cursor = self.conn.cursor()
+
+    def process_item(self, item, spider):
+        try:
+            if item.get('col_id') is None or item.get('col_id') =='':
+                print 'col_id.....',item.get('col_id')
+            else:
+                self.cursor.execute("""
+                INSERT INTO ccgp2
+                (col_id,col_title,col_type,col_gov_type,col_category,col_publish_time,col_buyer_name,col_projectId,col_zone,col_agent,col_html_content,col_index)
+                VALUES
+                (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                """, (
+                    item.get('col_id'),
+                    item.get('col_title'),
+                    item.get('col_type'),
+                    item.get('col_gov_type'),
+                    item.get('col_category'),
+                    item.get('col_publish_time'),
+                    item.get('col_buyer_name'),
+                    item.get('col_projectId'),
+                    item.get('col_zone'),
+                    item.get('col_agent'),
+                    item.get('col_html_content'),
+                    item.get('index')
+                ))
+                self.conn.commit()
+        except MySQLdb.Error, e:
+            print "Error %d: %s" % (e.args[0], e.args[1])
+
+        return item
 
 
 class CcgpToMysql(object):
@@ -45,7 +89,7 @@ class CcgpToMysql(object):
     def process_item(self, item, spider):
         db = self.dbpool.runInteraction(self._do_insert, item, spider)
         db.addErrback(self._handle_error, item, spider)
-        db.addBoth(lambda _:item)
+        db.addBoth(lambda _: item)
         return db
 
     # 添加入库
@@ -59,26 +103,29 @@ class CcgpToMysql(object):
         # insert into ccgp1(indexid,url,content) VALUES (%s,%s,%s)
         # """, (index,url, r"%s" % content.replace("\n","").replace("\r","")))
         if item.get('col_id'):
+            print "insert ...", item.get('col_id')
             conn.execute("""
             INSERT INTO ccgp2
             (col_id,col_title,col_type,col_gov_type,col_category,col_publish_time,col_buyer_name,col_projectId,col_zone,col_agent,col_html_content,col_index)
             VALUES
             (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """,(
-            item.get('col_id'),
-            item.get('col_title'),
-            item.get('col_type'),
-            item.get('col_gov_type'),
-            item.get('col_category'),
-            item.get('col_publish_time'),
-            item.get('col_buyer_name'),
-            item.get('col_projectId'),
-            item.get('col_zone'),
-            item.get('col_agent'),
-            item.get('col_html_content'),
-            item.get('index')
+            """, (
+                item.get('col_id'),
+                item.get('col_title'),
+                item.get('col_type'),
+                item.get('col_gov_type'),
+                item.get('col_category'),
+                item.get('col_publish_time'),
+                item.get('col_buyer_name'),
+                item.get('col_projectId'),
+                item.get('col_zone'),
+                item.get('col_agent'),
+                item.get('col_html_content'),
+                item.get('index')
             ))
 
-        else:pass
+        else:
+            pass
+
     def _handle_error(self, failue, item, spider):
-        print "failue......",failue
+        print "failue......", failue
