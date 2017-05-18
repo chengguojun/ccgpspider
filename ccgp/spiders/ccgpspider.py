@@ -39,18 +39,13 @@ class CcgpSpider(scrapy.Spider):
          "Hm_lpvt_9f8bda7a6bb3d1d7a9c7196bfed609b5": "1495004179"
          }
 
-
-
-
-
-
     headers = settings.HEADERS
     # meta = settings.META
     meta = {'dont_redirect': True, 'handle_httpstatus_list': [302]}
 
     def start_requests(self):
-        begin = datetime.date(2015, 5, 9)
-        end = datetime.date(2015, 6, 9)
+        begin = datetime.date(2015, 7, 11)
+        end = datetime.date(2015, 12, 31)
         for i in range((end - begin).days + 1):
             day = begin + datetime.timedelta(days=i)
             YY = str(day).split('-')[0] + "%3A"
@@ -125,8 +120,8 @@ class CcgpSpider(scrapy.Spider):
                     item['col_id'] = col_id
                 span = li.find('span')
                 if span != -1:
-                    spstr = span.get_text()
-                    cons = spstr.replace(" ", "").replace("\n", "|").replace("||", "|").split("|")
+                    sp_str = span.get_text()
+                    cons = sp_str.replace(" ", "").replace("\n", "|").replace("||", "|").split("|")
                     if cons:
                         item['col_publish_time'] = cons[0]
                         item['col_buyer_name'] = cons[1]
@@ -144,9 +139,6 @@ class CcgpSpider(scrapy.Spider):
                     pager = int(size[0])
                     print "size......",pager
                     for page in range(1, pager + 1):
-
-                        print "page......",page
-
                         ur = response.url
                         uri = ur.replace("page_index=%s" % re.findall("page_index=(\d+)", ur)[0],
                                          "page_index=%s" % page)
