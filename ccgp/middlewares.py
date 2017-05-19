@@ -8,6 +8,9 @@ import base64
 import random
 
 from scrapy import signals
+from scrapy.http import HtmlResponse
+from selenium import webdriver
+from selenium.webdriver import DesiredCapabilities
 
 from ccgp.settings import PROXIES
 
@@ -73,14 +76,41 @@ class RandomUserAgent(object):
     def process_request(self, request, spider):
         # print "**************************" + random.choice(self.agents)
         request.headers.setdefault('User-Agent', random.choice(self.agents))
+        request.headers.setdefault('Connection', 'keep - alive')
+        request.headers.setdefault('Accept',
+                                   'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
+        request.headers.setdefault('Accept-Encoding', 'gzip, deflate, sdch')
+        # request.headers.setdefault('X-Crawlera-Cookies', 'disable')
 
 
 class ProxyMiddleware(object):
-
     def process_request(self, request, spider):
         proxy = random.choice(PROXIES)
         if proxy.get('level') == u'透明':
-           pass
+            pass
         else:
-            print "**************ProxyMiddleware no pass************",proxy.get('address')+":"+proxy.get('port')
-            request.meta['proxy'] = "http://%s:%s" % (proxy.get('address'),proxy.get('port'))
+            print "**************ProxyMiddleware no pass************", proxy.get('address') + ":" + proxy.get('port')
+            request.meta['proxy'] = "http://%s:%s" % (proxy.get('address'), proxy.get('port'))
+
+
+class PhantomJSMiddleware(object):
+    @classmethod
+    def process_request(cls, request, spider):
+        desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
+        headers = {
+            'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Cache-Control': 'max-age=0',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
+            'Connection': 'keep-alive',
+            'Referer':'http://search.ccgp.gov.cn/'
+        }
+        for key, value in headers.iteritems():
+            desired_capabilities['phantomjs.page.customHeaders.{}'.format(key)] = value
+        driver = webdriver.PhantomJS(executable_path='phantomjs',desired_capabilities=desired_capabilities)  # /usr/local/bin/
+
+        driver.get(request.url)
+
+        content = driver.page_source.encode('utf-8')
+        driver.quit()
+        return HtmlResponse(request.url, encoding='utf-8', body=content, request=request)

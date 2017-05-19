@@ -39,7 +39,7 @@ class MySQLStorePipeline(object):
     def process_item(self, item, spider):
         try:
             if item.get('col_id') is None or item.get('col_id') =='':
-                print 'col_id.....',item.get('col_id')
+                print 'col_id.....',item.get('col_id'),item.get('index')
             else:
                 self.cursor.execute("""
                 INSERT INTO ccgp3
@@ -88,8 +88,8 @@ class CcgpToMysql(object):
 
     def process_item(self, item, spider):
         db = self.dbpool.runInteraction(self._do_insert, item, spider)
-        db.addErrback(self._handle_error, item, spider)
-        db.addBoth(lambda _: item)
+        # db.addErrback(self._handle_error, item, spider)
+        # db.addBoth(lambda _: item)
         return db
 
     # 添加入库

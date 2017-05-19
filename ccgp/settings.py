@@ -8,19 +8,22 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-from logging import ERROR
+
 
 BOT_NAME = 'ccgp'
 
 SPIDER_MODULES = ['ccgp.spiders']
 NEWSPIDER_MODULE = 'ccgp.spiders'
 
+ROBOTSTXT_OBEY = False
+JS_BIN = "phantomjs"
+#设置取消Cookes
+# COOKIES_ENABLED = False
 
-ROBOTSTXT_OBEY = True
 COOKIE={"JSESSIONID":"b64Qa5n3x-vOz5DkjWjvYO-FsA_rjE4qYrnUJCvWNaNM5VCXYO8c!-509693905"," __cc_verify__qssec_":"j12sITOlLX1xjERjVTxXJfx/YCYvgudq"," _gscu_273633028":"948196655cr1vr28","_gscs_273633028":"t94922038e62hmy28|pv:5"," _gscbrs_273633028":"1","Hm_lvt_9f8bda7a6bb3d1d7a9c7196bfed609b5":"1494818756","Hm_lpvt_9f8bda7a6bb3d1d7a9c7196bfed609b5":"1494924114"}
 ITEM_PIPELINES = {
     # 'ccgp.pipelines.CcgpPipeline': 100,
-    'ccgp.pipelines.MySQLStorePipeline': 800,
+    'ccgp.pipelines.CcgpToMysql': 800,
 }
 #start MySql database configure setting
 MYSQL_HOST = 'localhost'
@@ -29,31 +32,11 @@ MYSQL_USER = 'root'
 MYSQL_PASSWD = 'minemine'
 #end of MySql database configure setting
 HEADERS = {
-    'X-Crawlera-Cookies': 'disable',
-    'Connection': 'keep - alive',  # 保持链接状态
+    # 'X-Crawlera-Cookies': 'disable',
+    'Connection': 'keep - alive',
+    'Accept': 'application/json, text/javascript',
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36'
 }
-####################################################################
-
-# ########crawlera生效，需要添加你创建的api信息（如果填写了API key的话，pass填空字符串便可）
-CRAWLERA_ENABLED = True
-
-CRAWLERA_USER = '<API key>'
-
-CRAWLERA_PASS = 'bc58c892c1e7411c81535cec9a06b1fd'
-
-# ##  为了达到更高的抓取效率，可以禁用Autothrottle扩展和增加并发请求的最大数量，以及设置下载超时
-CONCURRENT_REQUESTS = 32
-
-CONCURRENT_REQUESTS_PER_DOMAIN = 32
-
-AUTOTHROTTLE_ENABLED = False
-
-DOWNLOAD_TIMEOUT = 600
-#########DOWNLOAD_DELAY的话，需要在setting.py中添加
-
-CRAWLERA_PRESERVE_DELAY = True
-##########################################################################
 
 META = {
     'dont_redirect': True,  # 禁止网页重定向
@@ -86,8 +69,8 @@ USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux i686; U;) Gecko/20070322 Kazehakase/0.4.5",
     "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.8) Gecko Fedora/1.9.0.8-1.fc10 Kazehakase/0.5.6",
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11",
-    # "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3) AppleWebKit/535.20 (KHTML, like Gecko) Chrome/19.0.1036.7 Safari/535.20",
-    # "Opera/9.80 (Macintosh; Intel Mac OS X 10.6.8; U; fr) Presto/2.9.168 Version/11.52",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3) AppleWebKit/535.20 (KHTML, like Gecko) Chrome/19.0.1036.7 Safari/535.20",
+    "Opera/9.80 (Macintosh; Intel Mac OS X 10.6.8; U; fr) Presto/2.9.168 Version/11.52",
 ]
 
 
@@ -96,9 +79,6 @@ PROXIES = [
     {"address": "122.5.129.179", "port": "808", "level": "匿名"},
     {"address": "113.58.234.106", "port": "808", "level": "匿名"},
     {"address": "117.177.241.98","port": "8080", "level": "高匿"},
-    {"address": "115.54.247.143","port": "8998", "level": "高匿"},
-    {"address": "124.133.230.254","port": "80", "level":"高匿"},
-    {"address": "94.23.168.92","port": "24631", "level": "高匿"},
     {"address": "112.17.14.138","port": "8080", "level": "高匿"},
     {"address":"61.147.247.205", "port":"1080","level":"匿名"},
     {"address":"112.84.10.140", "port":"8998","level":"高匿"},
@@ -117,8 +97,39 @@ DOWNLOAD_DELAY = 1
 DOWNLOADER_MIDDLEWARES = {
 
     'ccgp.middlewares.RandomUserAgent': 1,
+    # 'ccgp.middlewares.PhantomJSMiddleware': 103,
     # 'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 110,
     # 'ccgp.middlewares.ProxyMiddleware': 100,
-
-    # 'scrapy_crawlera.CrawleraMiddleware': 600
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

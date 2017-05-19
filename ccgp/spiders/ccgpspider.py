@@ -130,24 +130,22 @@ class CcgpSpider(scrapy.Spider):
                         item['col_category'] = cons[5]
                 yield item
 
-
-
-
-
         if pages:
             sizes = pages[0].script.getText()
             if sizes:
                 size = re.findall(ur"size:(\d+)", sizes)
                 if size:
-                    pager = int(size[0])
-                    print "总共是......", pager
-                    for page in range(1, pager + 1):
+                    pager = int(size[0])  # 总页数
+                    # print "size......", pager
+                    if index <= pager:
                         ur = response.url
                         uri = ur.replace("page_index=%s" % re.findall("page_index=(\d+)", ur)[0],
-                                         "page_index=%s" % page)
-                        # sleep(5)
+                                         "page_index=%s" % str(index + 1))
                         yield Request(uri, callback=self.parse,
                                       cookies=self.cookie,
-                                      headers=self.headers,
+                                      # headers=self.headers,
                                       meta=self.meta,
+                                      dont_filter=True,
                                       encoding='utf-8')
+
+
