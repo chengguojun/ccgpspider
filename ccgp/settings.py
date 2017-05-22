@@ -92,12 +92,12 @@ PROXIES = [
     {"address":"123.138.43.61","port":"8080","level":"匿名"}
 ]
 
-DOWNLOAD_DELAY = 1
+# DOWNLOAD_DELAY = 1
 
 DOWNLOADER_MIDDLEWARES = {
 
     'ccgp.middlewares.RandomUserAgent': 1,
-    # 'ccgp.middlewares.PhantomJSMiddleware': 103,
+    'ccgp.middlewares.PhantomJSMiddleware': 103,
     # 'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 110,
     # 'ccgp.middlewares.ProxyMiddleware': 100,
 }
@@ -105,9 +105,13 @@ DOWNLOADER_MIDDLEWARES = {
 
 
 
-
-
-
+#######重试
+#是否开启retry
+RETRY_ENABLED=True
+#遇到什么http code时需要重试，默认是500,502,503,504,408，
+RETRY_HTTP_CODECS=500,502,503,504,408
+#重试次数
+RETRY_TIMES=5
 
 
 

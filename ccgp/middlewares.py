@@ -13,6 +13,12 @@ from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 
 from ccgp.settings import PROXIES
+import sys
+
+from ccgp.items import CcgpItem
+#
+# reload(sys)
+# sys.setdefaultencoding('utf-8')
 
 
 class CcgpSpiderMiddleware(object):
@@ -84,6 +90,8 @@ class RandomUserAgent(object):
 
 
 class ProxyMiddleware(object):
+
+    @classmethod
     def process_request(self, request, spider):
         proxy = random.choice(PROXIES)
         if proxy.get('level') == u'透明':
@@ -94,23 +102,35 @@ class ProxyMiddleware(object):
 
 
 class PhantomJSMiddleware(object):
+
+
     @classmethod
     def process_request(cls, request, spider):
-        desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
-        headers = {
-            'Accept': '*/*',
-            'Accept-Language': 'en-US,en;q=0.8',
-            'Cache-Control': 'max-age=0',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
-            'Connection': 'keep-alive',
-            'Referer':'http://search.ccgp.gov.cn/'
-        }
-        for key, value in headers.iteritems():
-            desired_capabilities['phantomjs.page.customHeaders.{}'.format(key)] = value
-        driver = webdriver.PhantomJS(executable_path='phantomjs',desired_capabilities=desired_capabilities)  # /usr/local/bin/
+        print 'request.....',request
+        if request.meta.has_key('PhantomJS'):
+            print 'PhantomJS.....'
+            desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
+            headers = {
+                'Accept': '*/*',
+                'Accept-Language': 'en-US,en;q=0.8',
+                'Cache-Control': 'max-age=0',
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
+                'Connection': 'keep-alive',
+            }
+            desired_capabilities["phantomjs.page.settings.loadImages"] = False
+            for key, value in headers.iteritems():
+                desired_capabilities['phantomjs.page.customHeaders.{}'.format(key)] = value
+            driver = webdriver.PhantomJS(executable_path='C:\\developeutils\\developer\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe',
+                                         desired_capabilities=desired_capabilities)  # /usr/local/bin/
+            try:
+                driver.get(request.url)
+                content = driver.page_source
+            except:
+                print "error..."
+            finally:
+                print 'driver quit...'
+                driver.quit()
 
-        driver.get(request.url)
 
-        content = driver.page_source.encode('utf-8')
-        driver.quit()
-        return HtmlResponse(request.url, encoding='utf-8', body=content, request=request)
+
+            return HtmlResponse(request.url, encoding='utf-8', body=content, request=request)
