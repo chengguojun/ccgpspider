@@ -38,7 +38,7 @@ class CcgpSpider(scrapy.Spider):
     meta = {'dont_redirect': True, 'handle_httpstatus_list': [302]}
 
     def start_requests(self):
-        year = "2017:05:20"
+        year = "2016:02:12"
 
         url = 'http://search.ccgp.gov.cn/bxsearch?' \
               'searchtype=1' \
@@ -108,6 +108,7 @@ class CcgpSpider(scrapy.Spider):
                             print 'col_publish_time.....', item['col_publish_time']
                     yield item
 
+        ur = response.url
 
         if pages:
             sizes = pages[0].script.getText()
@@ -119,7 +120,7 @@ class CcgpSpider(scrapy.Spider):
                     print "index....", index
                     cur_page = int(index)
                     print cur_page, '..........................................'
-                    ur = response.url
+
                     if cur_page < pager:
                         uri = ur.replace("page_index=%s" % re.findall("page_index=(\d+)", ur)[0],
                                          "page_index=%s" % str(cur_page + 1))
@@ -130,7 +131,6 @@ class CcgpSpider(scrapy.Spider):
                                       dont_filter=True,
                                       encoding='utf-8')
                     else:
-
                         zone = re.findall("start_time=(.+?)&", ur)[0]
                         YY = int(zone.split(":")[0])
                         MM = int(zone.split(":")[1])
@@ -145,6 +145,23 @@ class CcgpSpider(scrapy.Spider):
                         uri2 = uri1.replace("start_time=%s" % re.findall("start_time=(.+?)&", uri1)[0] , "start_time=%s" % YYMMDD)
                         uri  = uri2.replace("end_time=%s" % re.findall("end_time=(.+?)&", uri2)[0] , "end_time=%s" % YYMMDD)
                         yield Request(uri, callback=self.parse,cookies=self.cookie,meta=self.meta,dont_filter=True,encoding='utf-8')
+        else:
+            zone = re.findall("start_time=(.+?)&", ur)[0]
+            YY = int(zone.split(":")[0])
+            MM = int(zone.split(":")[1])
+            DD = int(zone.split(":")[2])
+            YYMMDD = str(datetime.date(YY, MM, DD) + datetime.timedelta(days=1)).replace("-", ":")
+
+            print "ZONE...", zone
+
+            print "YYMMDD...", YYMMDD
+
+            uri1 = ur.replace("page_index=%s" % re.findall("page_index=(.+?)&", ur)[0], "page_index=1")
+            uri2 = uri1.replace("start_time=%s" % re.findall("start_time=(.+?)&", uri1)[0],"start_time=%s" % YYMMDD)
+            uri = uri2.replace("end_time=%s" % re.findall("end_time=(.+?)&", uri2)[0], "end_time=%s" % YYMMDD)
+            yield Request(uri, callback=self.parse, cookies=self.cookie, meta=self.meta, dont_filter=True, encoding='utf-8')
+
+
 
 
 
